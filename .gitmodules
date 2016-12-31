@@ -1,0 +1,3 @@
+[submodule "logerr"]
+	path = logerr
+	url = git@github.com:papiro/logerr.git
