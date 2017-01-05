@@ -7,16 +7,19 @@ const
     HttpServer: './lib/HttpServer',
     middleware: './lib/middleware',
     config: './config',
-    log: 'logs/startup.log'    
+    log: 'logs/startup.log',
+    logsys: 'logs/sys.log'
   }
 ,
   config = require(paths.config)
 ,
   fs = require('fs'),
-  path = require('path')
+  path = require('path'),
+  os = require('os')
 ,
   Log = require('logerr')(config.logLevel),
-  log = new Log(paths.log)
+  log = new Log(paths.log),
+  logsys = new Log(paths.logsys)
 ,
   HttpServer = require(paths.HttpServer)
 ,
@@ -52,9 +55,23 @@ middlewareLoader.then( middleware => {
   server.timeout = socketTimeout
   server.on('error', onError)
   server.on('request', onRequest)
-
+  /** Every hour: 
+   * 1. log the number of current connections
+   * 2. log the freemem/totalmem
+   * 3. log the system activity via the load average calculation
+   * 4. log the system uptime
+  **/
+  setInterval(() => {
+    server.getConnections( (err, count) => {
+      if (err) log.error(err)
+      logsys.log(`${count} connections open`)
+      logsys.info(`${os.freemem()}/${os.totalmem()} memory available`)
+      logsys.info(`${os.loadavg()}:::<< load average "should be less than number of logical CPUs in the system" (${os.cpus().length})`)
+      logsys.info(`${os.uptime()}:::<< system uptime`)
+    }) 
+  }, 3600000)
   // handle Ctrl+c
-  process.on('SIGINT', () => {
+  process.on(os.constants.signals.SIGINT, () => {
     server.close(() => {
       console.log(`${server.name || 'server'} shut-down gracefully - `)           
       process.exit(1)
