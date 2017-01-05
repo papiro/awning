@@ -35,7 +35,6 @@ const {
   port, 
   root, 
   api,
-  async = false,
   onError = noop, 
   onRequest = noop, 
   socketTimeout = 120000
@@ -48,7 +47,6 @@ middlewareLoader.then( middleware => {
     port, 
     root,
     api,
-    async,
     middleware
   })
   server.timeout = socketTimeout
