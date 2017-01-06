@@ -7,8 +7,8 @@ const
     HttpServer: './lib/HttpServer',
     middleware: './lib/middleware',
     config: './config',
-    log: 'logs/startup.log',
-    logsys: 'logs/sys.log'
+    log: 'startup.log',
+    logsys: 'sys.log'
   }
 ,
   config = require(paths.config)
@@ -17,7 +17,8 @@ const
   path = require('path'),
   os = require('os')
 ,
-  Log = require('logerr')(config.logLevel),
+  { logLevel, logsPath } = config,
+  Log = require('logerr')({ logLevel, logsPath }),
   log = new Log(paths.log),
   logsys = new Log(paths.logsys)
 ,
