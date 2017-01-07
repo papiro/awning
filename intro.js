@@ -28,7 +28,7 @@ const
 ;
 
 const middlewareLoader = new Promise( (resolve, reject) => {
-  fs.readdir(paths.middleware, (err, res) => {
+  fs.readdir(path.resolve(__dirname, paths.middleware), (err, res) => {
     if (err) { reject(err) }
     resolve(res.map( fn => require(`${paths.middleware}/${fn}`) ))
   }) 
