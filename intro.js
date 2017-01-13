@@ -19,8 +19,8 @@ const
 ,
   { logLevel, logsPath } = config,
   Log = require('logerr')({ logLevel, logsPath }),
-  log = new Log(paths.log),
-  logsys = new Log(paths.logsys)
+  log = new Log(paths.log, { rotate: true }),
+  logsys = new Log(paths.logsys, { rotate: true })
 ,
   HttpServer = require(paths.HttpServer)
 ,
