@@ -30,7 +30,8 @@ const
 const middlewareLoader = new Promise( (resolve, reject) => {
   fs.readdir(path.resolve(__dirname, paths.middleware), (err, res) => {
     if (err) { reject(err) }
-    resolve(res.map( fn => require(`${paths.middleware}/${fn}`) ))
+    // filter out dot files (like vim .swp files)
+    resolve(res.filter( file => file[0] !== '.' ).map( fn => require(`${paths.middleware}/${fn}`) ))
   }) 
 })
 
