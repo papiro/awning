@@ -63,6 +63,9 @@ middlewareLoader.then( middleware => {
    * 2. log the freemem/totalmem
    * 3. log the system activity via the load average calculation
    * 4. log the system uptime
+   * 5. log the process uptime
+   * 6. log the cpu usage
+   * 7. log the memory usage
   **/
   setInterval(() => {
     server.getConnections( (err, count) => {
@@ -71,6 +74,11 @@ middlewareLoader.then( middleware => {
       logsys.info(`${os.freemem()}/${os.totalmem()} memory available`)
       logsys.info(`${os.loadavg()}:::<< load average "should be less than number of logical CPUs in the system" (${os.cpus().length})`)
       logsys.info(`${os.uptime()}:::<< system uptime`)
+      logsys.info(`${process.uptime()}:::<< process uptime`)
+      const cpuUsage = process.cpuUsage()
+      logsys.info(`${cpuUsage.user}:::<< user cpu usage`)
+      logsys.info(`${cpuUsage.system}:::<< system cpu usage`)
+      logsys.info(`${process.memoryUsage()}:::<< process memory usage`)
     }) 
   }, 3600000)
   // handle Ctrl+c
