@@ -45,7 +45,9 @@ const {
 } = config
 
 // set root
-process.env.ROOT = root
+process.env.ROOT = config.root
+// set logs path
+process.env.LOGS_PATH = logsPath
 
 middlewareLoader.then( middleware => {
   log.log('...startup')
