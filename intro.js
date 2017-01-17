@@ -38,19 +38,20 @@ const middlewareLoader = new Promise( (resolve, reject) => {
 const { 
   name, 
   port, 
-  root, 
   api,
   onError = noop, 
   onRequest = noop, 
   socketTimeout = 120000
 } = config
 
+// set root
+process.env.ROOT = root
+
 middlewareLoader.then( middleware => {
   log.log('...startup')
   const server = new HttpServer({ 
     name,
     port, 
-    root,
     api,
     middleware
   })
