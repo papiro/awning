@@ -1,5 +1,5 @@
 #!/bin/sh
 
-git submodule init
-git submodule update
-mkdir -p logs/`date -I`
+mkdir logs
+mkdir node_modules
+(cd node_modules && git clone git@github.com:papiro/logerr.git)
