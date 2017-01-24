@@ -35,15 +35,6 @@ const middlewareLoader = new Promise( (resolve, reject) => {
   }) 
 })
 
-const { 
-  name, 
-  port, 
-  api,
-  onError = noop, 
-  onRequest = noop, 
-  socketTimeout = 120000
-} = config
-
 // set root
 process.env.ROOT = config.root
 // set logs path
@@ -51,10 +42,21 @@ process.env.LOGS_PATH = logsPath
 // set NODE_PATH
 process.env.NODE_PATH = path.join(__dirname, 'node_modules')
 
+const { 
+  name, 
+  uid,
+  port, 
+  api,
+  onError = noop, 
+  onRequest = noop, 
+  socketTimeout = 120000
+} = config
+
 middlewareLoader.then( middleware => {
   log.log('...startup')
   const server = new HttpServer({ 
     name,
+    uid,
     port, 
     api,
     middleware
