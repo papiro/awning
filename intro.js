@@ -19,8 +19,8 @@ const
 ,
   { logLevel, logsPath } = config,
   Log = require('logerr')({ logLevel, logsPath }),
-  log = new Log(paths.log, { rotate: true }),
-  logsys = new Log(paths.logsys, { rotate: true })
+  log = new Log(paths.log, { namespace: 'startup' }),
+  logsys = new Log(paths.logsys, { namespace: 'syslog' })
 ,
   HttpServer = require(paths.HttpServer)
 ,
@@ -75,7 +75,7 @@ middlewareLoader.then( middleware => {
   **/
   setInterval(() => {
     server.getConnections( (err, count) => {
-      if (err) log.error(err)
+      if (err) logsys.error(err)
       logsys.log(`${count} connections open`)
       logsys.info(`${os.freemem()}/${os.totalmem()} memory available`)
       logsys.info(`${os.loadavg()}:::<< load average "should be less than number of logical CPUs in the system" (${os.cpus().length})`)
