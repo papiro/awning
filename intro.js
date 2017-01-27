@@ -8,7 +8,8 @@ const
     middleware: './lib/middleware',
     config: './config',
     log: 'startup.log',
-    logsys: 'sys.log'
+    syslog: 'sys.log',
+    socketlog: 'socket.log'
   }
 ,
   config = require(paths.config)
@@ -20,7 +21,8 @@ const
   { logLevel, logsPath } = config,
   Log = require('logerr')({ logLevel, logsPath }),
   log = new Log(paths.log, { rotate: true }),
-  logsys = new Log(paths.logsys, { rotate: true })
+  syslog = new Log(paths.syslog, { rotate: true }),
+  socketlog = new Log(paths.socketlog, {rotate: true }) 
 ,
   HttpServer = require(paths.HttpServer)
 ,
@@ -63,7 +65,25 @@ middlewareLoader.then( middleware => {
   })
   server.timeout = socketTimeout
   server.on('error', onError)
-  server.on('request', onRequest)
+  server.on('request', req => {
+    onRequest()
+    // Socket logging!
+    req.connection.on('close', had_error => {
+      log.info(`socket closed ${had_error ? 'with' : 'without'} error`)
+    }).on('connect', () => {
+      log.info('socket connected')
+    }).on('data', buffer => {
+      log.info('data being written')
+    }).on('drain', () => {
+      log.info('data drained')
+    }).on('end', () => {
+      log.info('FIN packet received from "other end"')
+    }).on('error', err => {
+      log.error(err)
+    }).on('timeout', () => {
+      log.warn('socket timeout')
+    })
+  })
   /** Every hour: 
    * 1. log the number of current connections
    * 2. log the freemem/totalmem
@@ -76,15 +96,15 @@ middlewareLoader.then( middleware => {
   setInterval(() => {
     server.getConnections( (err, count) => {
       if (err) log.error(err)
-      logsys.log(`${count} connections open`)
-      logsys.info(`${os.freemem()}/${os.totalmem()} memory available`)
-      logsys.info(`${os.loadavg()}:::<< load average "should be less than number of logical CPUs in the system" (${os.cpus().length})`)
-      logsys.info(`${os.uptime()}:::<< system uptime`)
-      logsys.info(`${process.uptime()}:::<< process uptime`)
+      syslog.log(`${count} connections open`)
+      syslog.info(`${os.freemem()}/${os.totalmem()} memory available`)
+      syslog.info(`${os.loadavg()}:::<< load average "should be less than number of logical CPUs in the system" (${os.cpus().length})`)
+      syslog.info(`${os.uptime()}:::<< system uptime`)
+      syslog.info(`${process.uptime()}:::<< process uptime`)
       const cpuUsage = process.cpuUsage()
-      logsys.info(`${cpuUsage.user}:::<< user cpu usage`)
-      logsys.info(`${cpuUsage.system}:::<< system cpu usage`)
-      logsys.info(`${process.memoryUsage()}:::<< process memory usage`)
+      syslog.info(`${cpuUsage.user}:::<< user cpu usage`)
+      syslog.info(`${cpuUsage.system}:::<< system cpu usage`)
+      syslog.info(`${process.memoryUsage()}:::<< process memory usage`)
     }) 
   }, 3600000)
   // handle Ctrl+c
