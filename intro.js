@@ -21,7 +21,7 @@ const
   { logLevel, logsPath } = config,
   Log = require('logerr')({ logLevel, logsPath }),
   log = new Log(paths.log, { namespace: 'startup' }),
-  syslog = new Log(paths.syslog, { namespace: 'syslog' })
+  syslog = new Log(paths.syslog, { namespace: 'syslog' }),
   socketlog = new Log(paths.socketlog, { namespace: 'socket' }) 
 ,
   HttpServer = require(paths.HttpServer)
