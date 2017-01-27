@@ -96,5 +96,4 @@ middlewareLoader.then( middleware => {
   })
 }).catch( err => {
   log.error(`STARTUP ERROR ${err}`)
-  throw err 
 })
