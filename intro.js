@@ -41,8 +41,6 @@ const middlewareLoader = new Promise( (resolve, reject) => {
 process.env.ROOT = config.root
 // set logs path
 process.env.LOGS_PATH = logsPath
-// set NODE_PATH
-process.env.NODE_PATH = path.join(__dirname, 'node_modules')
 
 const { 
   name, 
