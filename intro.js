@@ -6,17 +6,14 @@ const
   paths = {
     HttpServer: './lib/HttpServer',
     middleware: './lib/middleware',
-    config: './config',
     log: 'startup.log',
     syslog: 'sys.log',
     socketlog: 'socket.log'
   }
 ,
-  config = require(paths.config)
+  fs = require('fs'), path = require('path'), os = require('os')
 ,
-  fs = require('fs'),
-  path = require('path'),
-  os = require('os')
+  config = require(path.resolve(process.cwd(), process.argv[2]))
 ,
   { logLevel, logsPath } = config,
   Log = require('logerr')({ logLevel, logsPath }),
