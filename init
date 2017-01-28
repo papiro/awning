@@ -1,5 +1,4 @@
 #!/bin/sh
 
 mkdir logs
-mkdir node_modules
 (cd node_modules && git clone git@github.com:papiro/logerr.git)

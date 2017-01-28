@@ -1,0 +1,3 @@
+[submodule ".node_libraries/logerr"]
+	path = .node_libraries/logerr
+	url = git@github.com:papiro/logerr.git
