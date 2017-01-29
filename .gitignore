@@ -1,5 +1,3 @@
 node.core
 config.js
-node_modules/
-.node_libraries
 logs/
