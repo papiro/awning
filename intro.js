@@ -55,12 +55,13 @@ middlewareLoader.then( middleware => {
     uid,
     port, 
     api,
+    root,
     middleware
   })
   server.timeout = socketTimeout
   server.on('error', onError)
-  server.on('request', req => {
-    onRequest()
+  server.on('request', (req, res) => {
+    onRequest(req, res)
     // Socket logging!
     req.connection.on('close', had_error => {
       log.info(`socket closed ${had_error ? 'with' : 'without'} error`)
