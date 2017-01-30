@@ -34,8 +34,6 @@ const middlewareLoader = new Promise( (resolve, reject) => {
   }) 
 })
 
-// set root
-process.env.ROOT = config.root
 // set logs path
 process.env.LOGS_PATH = logsPath
 
@@ -44,6 +42,7 @@ const {
   uid,
   port, 
   api,
+  root,
   onError = noop, 
   onRequest = noop, 
   socketTimeout = 120000
