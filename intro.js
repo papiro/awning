@@ -43,6 +43,7 @@ const {
   port, 
   api,
   root,
+  rewrite,
   onError = noop, 
   onRequest = noop, 
   socketTimeout = 120000
@@ -56,6 +57,7 @@ middlewareLoader.then( middleware => {
     port, 
     api,
     root,
+    rewrite,
     middleware
   })
   server.timeout = socketTimeout
