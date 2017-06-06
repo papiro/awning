@@ -13,7 +13,8 @@ module.exports = (config = {}) => {
   ,
     fs = require('fs'), path = require('path'), os = require('os'), util = require('util')
   ,
-    debug = util.debuglog('awning')
+    debug = util.debuglog('awning'),
+    debug_socket = util.debuglog('awning.socket')
   ,
     HttpServer = require(paths.HttpServer)
   ,
@@ -49,19 +50,19 @@ module.exports = (config = {}) => {
     onRequest(req, res)
     // Socket logging!
     req.connection.on('close', had_error => {
-      debug(`socket closed ${had_error ? 'with' : 'without'} error`)
+      debug_socket(`socket closed ${had_error ? 'with' : 'without'} error`)
     }).on('connect', () => {
-      debug('socket connected')
+      debug_socket('socket connected')
     }).on('data', buffer => {
-      debug('data being written')
+      debug_socket('data being written')
     }).on('drain', () => {
-      debug('data drained')
+      debug_socket('data drained')
     }).on('end', () => {
-      debug('FIN packet received from "other end"')
+      debug_socket('FIN packet received from "other end"')
     }).on('error', err => {
-      debug(err)
+      debug_socket(err)
     }).on('timeout', () => {
-      debug('socket timeout')
+      debug_socket('socket timeout')
     })
   })
   
