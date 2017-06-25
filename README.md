@@ -58,6 +58,7 @@ require('awning')({
     'static'
   ].map( middleware => require(`./node_modules/awning/lib/middleware/${middleware}`) )
 })
+```
 
 ## Awning is under active development
 Awning is developed as use-cases are found.  Because it is being developed in tandem with the development of [LivityJS](https://www.github.com/papiro/livity) which is being developed, along with Awning, to support the development of several apps, many unconventional use-cases are able to be avoided in favor of a simpler solution on the front-end.  There are also certain activities which are better suited for a reverse-proxy/load-balancer which don't have much development in awning, such as support for virtual hosts.  Middleware like `headers.mimeType` may also go the way of the dinosaurs if it doesn't seem simple to get right or is not practically implemented in Node.js.
