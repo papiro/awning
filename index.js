@@ -24,21 +24,34 @@ module.exports = (config = {}) => {
   const { 
     name, 
     uid,
-    port, 
+    port,
+    auth,
     api,
     root,
     rewrite,
     onError = noop, 
     onRequest = noop, 
     socketTimeout = 120000,
-    middleware
+    middleware = [
+      //  'logger',
+      'csrf.originCheck',
+      'csrf.synchronizer',
+      'auth',
+      'REST', 
+      'rewrite', 
+      'headers.mimeType', 
+      'headers.caching',
+      'beans',
+      'static'
+    ].map( middleware => require(`${paths.middleware}/${middleware}`))
   } = config
 
   debug('...startup')
   const server = new HttpServer({ 
     name,
     uid,
-    port, 
+    port,
+    auth,
     api,
     root,
     rewrite,
