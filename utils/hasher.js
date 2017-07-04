@@ -10,48 +10,47 @@ const
 ,
   fs = require('fs'),
   path = require('path')
+,
+  isCLI = (require.main === module)
 ;
 
-if (require.main === module) {
+if (isCLI) {
   const 
     args = process.argv.slice(2),
     str = args[0],
-    opts = require('sarge')(args.slice(1))
+    opts = require('sarge')(str.slice(1))
   ;
 
-  hasher(str, opts.o || opts.output)
+  hasher(str, opts.s || opts.salt)
 }
 
 module.exports = hasher
 
-function hasher (str, filename = '') {
+async function hasher (str, _salt) {
   if (!str) throw new Error('Need a string to hash!')
 
-  const hashGenerator = new Promise( (resolve, reject) => {
+  const salt = _salt || await new Promise( (resolve, reject) => {
     // Generate salt
-    crypto.randomBytes(saltLength, (err, buf) => {
+    crypto.randomBytes(saltLength, (err, saltBuf) => {
       if (err) return reject(err)
-    // Generate hash
-      crypto.pbkdf2(str, buf.toString(), pbkdf2_iterations, pbkdf2_keylen, pbkdf2_digestAlgorithm, (err, hash) => {
-        if (err) return reject(err)
-        resolve(hash.toString(outputEncoding))
-      })
-    })  
+      resolve(saltBuf.toString(outputEncoding))
+    })
+  })    
+
+  const hash = await new Promise( (resolve, reject) => {
+  // Generate hash
+    crypto.pbkdf2(str, salt, pbkdf2_iterations, pbkdf2_keylen, pbkdf2_digestAlgorithm, (err, hash) => {
+      if (err) return reject(err)
+      resolve(hash.toString(outputEncoding))
+    })
   })
 
-  hashGenerator
-    .then( hash => {
-      if (filename) {
-        fs.writeFile(filename, hash, err => {
-          if (err) throw err
-          console.log('password written to ', path.resolve(filename))
-        })
-      }
-      else {
-        console.log(hash)
-      }
-    })
-    .catch( err => {
-      throw err
-    })  
+  if (isCLI) {
+    console.log('hash: ', hash)
+    if (!_salt) {
+      console.log('salt: ', salt)      
+    }
+  } else {
+    return ( _salt ? hash : { hash, salt } )
+  }
 }
