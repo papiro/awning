@@ -18,7 +18,7 @@ if (isCLI) {
   const 
     args = process.argv.slice(2),
     str = args[0],
-    opts = require('sarge')(str.slice(1))
+    opts = require('sarge')(args.slice(1))
   ;
 
   hasher(str, opts.s || opts.salt)
