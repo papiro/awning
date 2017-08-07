@@ -24,11 +24,13 @@ module.exports = (config = {}) => {
   const { 
     // Needed for middleware
     root,
+    api,
     auth
   } = config
 
   global.app = {
     root,
+    api,
     auth
   }
 
@@ -36,7 +38,6 @@ module.exports = (config = {}) => {
     name, 
     uid,
     port,
-    api,
     rewrite,
     onError = noop, 
     onRequest = noop, 
