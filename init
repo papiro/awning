@@ -1,4 +1,0 @@
-#!/bin/sh
-
-mkdir logs
-(cd node_modules && git clone git@github.com:papiro/logerr.git)
