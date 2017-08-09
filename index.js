@@ -4,7 +4,7 @@
   *   debuglog namespaces: awning, awning.REST, awning.rewrite, awning.static
 ***/
 
-module.exports = (config = {}) => {
+exports.server = (config = {}) => {
   const 
     paths = {
       HttpServer: './lib/HttpServer',
