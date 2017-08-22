@@ -4,10 +4,12 @@
   *   debuglog namespaces: awning, awning.REST, awning.rewrite, awning.static
 ***/
 
+exports.AwningStore = require('./lib/AwningStore')
+
 exports.server = (config = {}) => {
   const 
     paths = {
-      HttpServer: './lib/HttpServer',
+      HttpServer: './lib/AwningServer',
       middleware: './lib/middleware'
     }
   ,
