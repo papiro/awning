@@ -27,14 +27,15 @@ exports.server = (config = {}) => {
     // Needed for middleware
     root,
     api,
-    auth
+    auth,
+    globals
   } = config
 
-  global.app = {
+  global.app = Object.assign({
     root,
     api,
     auth
-  }
+  }, globals)
 
   const {
     name, 
