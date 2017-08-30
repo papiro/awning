@@ -24,17 +24,19 @@ exports.server = (config = {}) => {
   ;
 
   const { 
-    // Needed for middleware
+    // Stuff we need for middleware.
     root,
     api,
     auth,
-    globals
+    globals,
+    bnsConfig
   } = config
 
   global.app = Object.assign({
     root,
     api,
-    auth
+    auth,
+    bnsConfig
   }, globals)
 
   const {
