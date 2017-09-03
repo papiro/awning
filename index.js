@@ -4,7 +4,9 @@
   *   debuglog namespaces: awning, awning.REST, awning.rewrite, awning.static
 ***/
 
-exports.AwningStore = require('./lib/AwningStore')
+exports.utils = require('./lib/AwningUtils')
+
+exports.Store = require('./lib/AwningStore')
 
 exports.server = (config = {}) => {
   const 
@@ -62,16 +64,16 @@ exports.server = (config = {}) => {
   } = config
 
   debug('...startup')
+
   const server = new HttpServer({ 
     name,
     uid,
     port,
-    // auth,
     api,
-    // root,
     rewrite,
     middleware
   })
+
   server.timeout = socketTimeout
   server.on('error', onError)
   server.on('request', (req, res) => {
