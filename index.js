@@ -15,7 +15,7 @@ exports.server = (config = {}) => {
       middleware: './lib/middleware'
     }
   ,
-    fs = require('fs'), path = require('path'), os = require('os'), util = require('util')
+    fs = require('fs'), path = require('path'), util = require('util')
   ,
     debug = util.debuglog('awning'),
     debug_socket = util.debuglog('awning.socket')
