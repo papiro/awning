@@ -97,7 +97,7 @@ exports.server = (config = {}) => {
   })
   
   // handle Ctrl+c
-  process.on(os.constants.signals.SIGINT, () => {
+  process.on('SIGINT', () => {
     server.close(() => {
       console.log(`${server.name || 'server'} shut-down gracefully - `)           
       process.exit(1)
