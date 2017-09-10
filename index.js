@@ -12,7 +12,7 @@ exports.server = (config = {}) => {
   const 
     paths = {
       HttpServer: './lib/AwningServer',
-      middleware: './lib/middleware'
+      middleware: './middleware'
     }
   ,
     fs = require('fs'), path = require('path'), util = require('util')
@@ -34,7 +34,7 @@ exports.server = (config = {}) => {
     bnsConfig
   } = config
 
-  global.app = Object.assign({
+  Object.assign(global.app, {
     root,
     api,
     auth,
@@ -51,15 +51,15 @@ exports.server = (config = {}) => {
     socketTimeout = 120000,
     middleware = [
       //  'logger',
-      'csrf.originCheck',
-      'csrf.synchronizer',
+      //  'csrf.originCheck',
+      //  'csrf.synchronizer',
       'auth',
       'REST', 
       'rewrite', 
-      'headers.mimeType', 
-      'headers.caching',
-      'beans',
-      'static'
+      //  'headers.mimeType', 
+      //  'headers.caching',
+      'beans'//,
+      //  'static'
     ].map( middleware => require(`${paths.middleware}/${middleware}`))
   } = config
 
