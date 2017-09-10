@@ -13,7 +13,7 @@ const
   otpLength = 6
 ,
   // hasher can also be used as a CLI utility which is why it's a part of Awning's utils and not the middleware's utils.
-  hasher = require('../../../utils/hasher.js')
+  hasher = require('../../utils/hasher.js')
 ;
 
 class AuthController extends EventEmitter {

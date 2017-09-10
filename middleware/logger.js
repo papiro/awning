@@ -3,9 +3,9 @@
 const 
   path = require('path')
 ,
-  Log = require('logerr')
+  Log = require('logerr')({ level: 4, path: path.join(app.root || '', 'logs') })   
 ,
-  date = (new Date()).toISOString().split('T')[0]
+  date = (new Date()).toAdjustedISOString().split('T')[0]
 ,
   log_request = new Log(`${date}.log`, `${date}.err`, { namespace: 'request' })
 ;
@@ -37,7 +37,7 @@ module.exports = function logger (req, res, done) {
         ips[ip] = now
       } else {
         ips[ip] = now
-        log_request.info(new Date())
+        //log_request.info(new Date())
         log_request.log('ip ', ip)
         log_request.log('user-agent ', req.headers['user-agent'])
       }
