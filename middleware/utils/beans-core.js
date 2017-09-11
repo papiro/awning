@@ -99,7 +99,14 @@ function compile (bean) {
               .split(/, ?/)
               .map( val => val.replace(regex.quotes, ''))
     // interpolate the array values into the expanded markup
-    return context.map( val => bean.replace(new RegExp('\\$\\{'+context_internal+'\\}', 'g'), val)).join('')
+    return context.map( val => markup.replace(new RegExp('\\$\\{'+context_internal+'\\}', 'ig'), match => {
+      if (/[A-Z]/.test(match[2])) {
+        debug(`Capitalizing "${val}"`)
+        return val[0].toUpperCase() + val.slice(1)
+      } else {
+        return val
+      }
+    })).join('')
   
   } else {
 //    debug('setting compile fn')
