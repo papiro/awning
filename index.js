@@ -3,6 +3,9 @@
 /***
   *   debuglog namespaces: awning, awning.REST, awning.rewrite, awning.static
 ***/
+exports.dev = require('./lib/awningDev')
+
+exports.build = require('./lib/awningBuild')
 
 exports.utils = require('./lib/AwningUtils')
 
