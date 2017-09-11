@@ -21,7 +21,11 @@ module.exports = function beans (req, res, done) {
   fs.readFile(bnsPath, { encoding: 'utf8' }, (err, markup) => {
     if (err) {
       debug(err)
-      res.emit('error', err)
+      if (err.code === 'ENOENT') {
+        res.setStatus(404)
+      } else {
+        res.emit('error', err)
+      }
       return done(false)
     }
 
