@@ -85,47 +85,56 @@ function splitBeanSignature (beanSig) {
   return beanSig.split(' as ')
 }
 
+function strToArr (str) {
+  let ret = str.slice(1, -1)
+  const isCollection = (ret.trim()[0] === '{')
+  const splitterRegex = ( isCollection ? /\{[^\}]*\}/g : /[\w]+/g )
+  ret = ret.match(splitterRegex)
+
+  if (isCollection) {
+    ret.reduce( (obj, keyVals) => {
+      const reg = /(\w+)|'([^']*)'|"([^"]*)"/g
+      let match, queue = [] 
+      while(match = reg.exec(keyVals)){
+        // If more than one match, prefer last match (more restrictive).
+        queue.push(match[2] || match[1] || match[0])
+        if (queue.length === 2) {
+          const [key, val] = queue
+          obj[key] = val
+          queue = []
+        }
+      }
+      return obj
+    }, {})
+  }  
+
+  return ret
+}
+
 function compile (bean) {
   const [signature, markup] = splitBean(bean)  
   const [context_external, context_internal] = splitBeanSignature(signature)
-  if (context_external[0] === '[') {
-    // this is a special type of bean which can be instantly evaluated 
-    //  into a static result.
-    debug('bean expression is an array literal or object literal')
-    debug('simplifying bean...')
-    // stringed-array 2 array
-    const context = context_external
-              .slice(1, -1)
-              .split(/, ?/)
-              .map( val => val.replace(regex.quotes, ''))
-    // interpolate the array values into the expanded markup
-    return context.map( val => markup.replace(new RegExp('\\$\\{'+context_internal+'\\}', 'ig'), match => {
-      if (/[A-Z]/.test(match[2])) {
-        debug(`Capitalizing "${val}"`)
-        return val[0].toUpperCase() + val.slice(1)
-      } else {
-        return val
-      }
-    })).join('')
-  
-  } else {
-//    debug('setting compile fn')
-//    this.tpl = (context, opts) => {
-//      // interpolate
-//      return this.markup.replace(regex.interpolation, (match) => {
-//        // parse the interpolation key
-//        const key = match.match(regex.interpolation_stripped)[1]
-//        debug('replacing ', match, ' with ', context[key])
-//        return context[key]
-//      })
+  console.log('ctext:::', context_external)
+  const fn = new Function(context_internal, `return \`${markup}\``)
+  console.log(fn.toString())
+  const args = eval(context_external)
+  const ret = args.map(fn).join('')
+  return ret
+//  if (context_external[0] === '[') {
+//    // This is a special type of bean which can be instantly evaluated 
+//    //  into a static result.
+//    debug('bean expression is an array literal or object literal.')
+//
+//    const replacerRegex = new RegExp('\\$\\{'+context_internal+'\\}', 'ig')
+//    
+//    const context = strToArr(context_external)
+//    function foo (...args) { console.log(...args) }
+//    const output = foo`${(`${markup}`)}`
+//    console.log(output)
+//    // interpolate the array values into the expanded markup
+//    //return strToArr(context_external).map( item => markup.replace(replacerRegex, match => {})).join('')
+//  
 //    }
-//    if (this.exp[0] === '{') {
-//      debug('bean expression is an object literal')
-//      context = JSON.parse(this.exp)
-//      // bind the object as the default context of this markup
-//      this.tpl = this.tpl.bind(this, context)
-//    }
-  }
 }
 
 function precompile (bean, beanId) {
