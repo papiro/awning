@@ -41,11 +41,9 @@ module.exports = function beans (req, res, done) {
       if (beanData.fn && app.bnsConfig && (tplConf = app.bnsConfig[beanData.id])) {
         debug(`Rendering template:::${beanData.id}:::using fn:::${beanData.fn}.`)
         const fn = eval(beanData.fn)
-        return new Promise( (resolve, reject) => {
-          tplConf.getData().then( data => {
-            debug(`And with data:::${data}.`)
-            resolve(fn(data))
-          })
+        return tplConf.data().then( data => {
+          debug(`And with data:::${data}.`)
+          return fn(data)
         })
       } else if (beanData.fn) {
         // Otherwise, make the bean function available via window.awning.beans in the browser.
@@ -69,6 +67,8 @@ module.exports = function beans (req, res, done) {
       res.write(output)
       // Write to file instead of writing the response and let static handle it?
       return done(false)
+    }).catch( err => {
+      res.emit('error', err)
     })
   })
 }
