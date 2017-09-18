@@ -11,7 +11,9 @@ const
     interpolation: /\$\{.*\}/g,
     interpolation_stripped: /(?:\$\{)(.*)(?:\})/g,
     beanMatcherString: `(<${beanTag}.*>)([\\s\\S]*)(?:<\/${beanTag}>)`,
-    inlineBeanMatcherString: `(?:[^\\\\])${inlineBeanDelimiter}([\\s\\S]*?[^\\\\])${inlineBeanDelimiter}`
+    inlineBeanMatcherString: `(?:[^\\\\])${inlineBeanDelimiter}([\\s\\S]*?[^\\\\])${inlineBeanDelimiter}`,
+    beanSplitter: /[\s\n]*=>[\s\n]*/,
+    beanSigSplitter: / as /
   }
 ,
   masterRegEx = new RegExp(regex.beanMatcherString + '|' + regex.inlineBeanMatcherString, 'g')
@@ -47,14 +49,16 @@ module.exports = {
 
       let beanId
       if (bean) {
-        if (!(beanId = openingBeanTag.match(/id=['"](.*)['"]/))) {
+        if (!(beanId = openingBeanTag.match(/id=['"]([^'"]*)['"]/))) {
           throw new ReferenceError(`Bean in ${markup} must have a valid "id" attribute.`)
         } else {
           beanId = beanId[1]
+          const dataArgs = openingBeanTag.match(/data-args=['"](.*)['"]/)[1]
           debug(`Bean ID:::${beanId}`)
+          debug(`Bean data args:::${dataArgs}`)
           const precompiled = precompile(bns, beanId)
           debug(`Precompiled match:::${precompiled}`)
-          pieces.push({ fn: precompiled, id: beanId })
+          pieces.push({ fn: precompiled, id: beanId, args: dataArgs })
         }
       } else if (inlineBean) {
         const compiled = compile(bns)
@@ -75,14 +79,12 @@ module.exports = {
   }
 }
 
-function splitBean (bean) {
-  // Extract the signature.
-  return bean.split(/[\s\n]*=>[\s\n]*/)
-}
-
-function splitBeanSignature (beanSig) {
-  // Extract the variable name (external) and its iterator (internal).
-  return beanSig.split(' as ')
+function splitBean (str, regex) {
+  let split = str.split(regex)
+  if (split.length === 1) {
+    split = [,split[0]]
+  }
+  return split
 }
 
 function strToArr (str) {
@@ -112,9 +114,12 @@ function strToArr (str) {
 }
 
 function compile (bean) {
-  const [signature, markup] = splitBean(bean)  
-  const [context_external, context_internal] = splitBeanSignature(signature)
-  console.log('ctext:::', context_external)
+  const [signature, markup] = splitBean(bean, regex.beanSplitter)  
+  debug(`Signature:::${signature}`)
+  debug(`Markup:::${markup}`)
+  const [context_external, context_internal] = splitBean(signature, regex.beanSigSplitter)
+  debug(`ctx_external:::${context_external}`)
+  debug(`ctx_internal:::${context_internal}`)
   const fn = new Function(context_internal, `return \`${markup}\``)
   console.log(fn.toString())
   const args = eval(context_external)
@@ -138,8 +143,23 @@ function compile (bean) {
 }
 
 function precompile (bean, beanId) {
-  const [signature, markup] = splitBean(bean)  
-  const [, context_internal] = splitBeanSignature(signature)
+  const [signature, markup] = splitBean(bean, regex.beanSplitter)  
+  debug(`Signature:::${signature}`)
+  debug(`Markup:::${markup}`)
+
+  if (!signature) {
+    return new Function('data', 
+      `
+        function bound () {
+          return \`${markup}\`
+        }
+        return bound.bind(data)()
+      `
+    )
+  }
+
+  const [, context_internal] = splitBean(signature, regex.beanSigSplitter)
+  debug(`ctx_internal:::${context_internal}`)
 
   return new Function('collection', 
     `

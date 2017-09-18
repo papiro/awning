@@ -38,11 +38,15 @@ module.exports = function beans (req, res, done) {
       let output, tplConf
       // If what we have is a function to generate markup...
       // ...and we have the data, go ahead and render right here.
-      if (beanData.fn && app.bnsConfig && (tplConf = app.bnsConfig[beanData.id])) {
-        debug(`Rendering template:::${beanData.id}:::using fn:::${beanData.fn}.`)
+      if (beanData.fn 
+          && app.bnsConfig 
+          && (tplConf = app.bnsConfig[beanData.id])
+          && tplConf.data) {
+        debug(`Rendering template:::${beanData.id}:::using fn:::${beanData.fn}:::with data args:::${beanData.args}`)
         const fn = eval(beanData.fn)
-        return tplConf.data().then( data => {
-          debug(`And with data:::${data}.`)
+        return tplConf.data(beanData.args).then( data => {
+          debug(`And with data:::`)
+          debug(data)
           return fn(data)
         })
       } else if (beanData.fn) {
