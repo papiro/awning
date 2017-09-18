@@ -122,7 +122,7 @@ function compile (bean) {
   debug(`ctx_external:::${context_external}`)
   debug(`ctx_internal:::${context_internal}`)
   const fn = new Function(context_internal, `return \`${markup}\``)
-  console.log(fn.toString())
+  debug(fn.toString())
   const args = eval(context_external)
   const ret = args.map(fn).join('')
   return ret
