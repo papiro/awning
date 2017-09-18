@@ -53,7 +53,8 @@ module.exports = {
           throw new ReferenceError(`Bean in ${markup} must have a valid "id" attribute.`)
         } else {
           beanId = beanId[1]
-          const dataArgs = openingBeanTag.match(/data-args=['"](.*)['"]/)[1]
+          let dataArgs = openingBeanTag.match(/data-args=['"](.*)['"]/)
+          dataArgs = dataArgs && dataArgs[1]
           debug(`Bean ID:::${beanId}`)
           debug(`Bean data args:::${dataArgs}`)
           const precompiled = precompile(bns, beanId)

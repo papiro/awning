@@ -66,7 +66,7 @@ module.exports = function beans (req, res, done) {
     })
 
     Promise.all(beanPromises).then( markup => {
-      const output = markup.join('')
+      const output = markup.map(piece => piece.trim()).join('')
       debug(`Writing:::${output}`)
       res.write(output)
       // Write to file instead of writing the response and let static handle it?
