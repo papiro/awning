@@ -142,6 +142,7 @@ class AuthController extends EventEmitter {
 
   isProtectedResource ({ url: req_url, params: req_params, method: req_method }, protectedResourcesConfig) {
     return protectedResourcesConfig.some( config => {
+      if (config instanceof Object === false) throw new TypeError('protected resources need to be objects with url/urlRegex/method/query properties')
       const { url, urlRegex, method, query } = config
       if (!Object.keys(config).length
           || url && req_url !== url 
