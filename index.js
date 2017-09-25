@@ -63,7 +63,7 @@ exports.server = (config = {}) => {
       //  'headers.caching',
       'beans'//,
       //  'static'
-    ].map( middleware => require(`${paths.middleware}/${middleware}`))
+    ]
   } = config
 
   debug('...startup')
@@ -74,7 +74,7 @@ exports.server = (config = {}) => {
     port,
     api,
     rewrite,
-    middleware
+    middleware: middleware.map( middleware => require(`${paths.middleware}/${middleware}`))
   })
 
   server.timeout = socketTimeout
