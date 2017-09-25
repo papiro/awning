@@ -29,32 +29,34 @@ if (auth) {
   const { protectedResources } = auth
   if (!protectedResources) throw new ReferenceError('No protected resources found in the config auth object.  No point in having auth without having resources which need protection.')
   
-  if (basic) {
-    basicFn = ({ url }, res) => {
-      return new Promise( (resolve, reject) => {
-        resolve()        
-      })
-      // authController
-      //   .once('user.create.success', () => {
-      //     debug('SUCCESSFUL:::user.create')
-      //     done()
-      //   })
-      //   .once('user.create.fail', err => {
-      //     debug('ERROR:::user.create')
-      //     throw err
-      //   })
+  debug(basic, otp, custom)
+  debug(`Protected resources:::${protectedResources}`)
 
-      // switch (url) {
-      //   case gateway.create:
-      //     authController.userCreate(payload.username, payload.password)      
-      //     break
-      //   case gateway.login:
-      //     authController.userLogin(payload.username, payload.password)
-      //     break
-      //   default:
-      //     return done()
-      //   break
-      // }
+  if (basic) {
+    const { gateway } = basic
+    basicFn = ({ url }, res) => {
+      const payload = res.getPOSTpayload()
+      authController
+        .once('user.create.success', () => {
+          debug('SUCCESSFUL:::user.create')
+          done()
+        })
+        .once('user.create.fail', err => {
+          debug('ERROR:::user.create')
+          throw err
+        })
+
+      switch (url) {
+        case gateway.create:
+          authController.userCreate(payload.username, payload.password)      
+          break
+        case gateway.login:
+          authController.userLogin(payload.username, payload.password)
+          break
+        default:
+          return done()
+        break
+      }
     }
   }
 
@@ -101,10 +103,8 @@ if (auth) {
 
   authFn = (req, res, done) => {
     const { url, params } = req
-    
-    debug('Protected resources:::', protectedResources)
     if (authController.isProtectedResource(req, auth.protectedResources)) {
-      debug(`${url} with is a protected resource.`)
+      debug(`${url} is a protected resource.`)
       debug(params)
       if (!authController.isValidSession(req)) {
         debug('Not a valid session.')
