@@ -53,11 +53,17 @@ module.exports = {
           throw new ReferenceError(`Bean in ${markup} must have a valid "id" attribute.`)
         } else {
           beanId = beanId[1]
+          const isJS = /data-js[ >]/.test(openingBeanTag)
+          let dataAs = openingBeanTag.match(/data-as=['"](.*)['"]/)
           let dataArgs = openingBeanTag.match(/data-args=['"](.*)['"]/)
           dataArgs = dataArgs && dataArgs[1]
+          dataAs = dataAs && dataAs[1]
+
           debug(`Bean ID:::${beanId}`)
           debug(`Bean data args:::${dataArgs}`)
-          const precompiled = precompile(bns, beanId)
+          debug(`Bean is js:::${isJS}`)
+          debug(`Bean data as:::${dataAs}`)
+          const precompiled = isJS ? precompileJS(bns, dataAs) : precompile(bns, beanId)
           debug(`Precompiled match:::${precompiled}`)
           pieces.push({ fn: precompiled, id: beanId, args: dataArgs })
         }
@@ -143,6 +149,11 @@ function compile (bean) {
 //    }
 }
 
+function precompileJS (bean, as = 'data') {
+  const fn = new Function(as, bean)
+  return fn
+}
+
 function precompile (bean, beanId) {
   const [signature, markup] = splitBean(bean, regex.beanSplitter)  
   debug(`Signature:::${signature}`)
@@ -172,48 +183,3 @@ function precompile (bean, beanId) {
   )
 }
 
-class Bean {
-  constructor (bean) {
-
-    // make these available on the instance
-    Object.assign(this, { 
-      stringBean: bean,
-      markup,
-      exp
-    })
-  }
-
-
-  evaluate (context) {
-    // If using evaluate straight-away as a shortcut method
-    if (!this.tpl && !this.result) {
-      this.compile()
-    }
-    return this.result || this.tpl(context)
-  }
-
-  createFn (str) {
-
-  }
-}
-
-class InlineBean extends Bean {
-
-}
-
-/*exports.Beans = */class Beans {
-  constructor (str) {
-
-    Object.assign(this, inlineBeans, { 
-      length: inlineBeans.length,
-      inlineBeans,
-      beans
-    })
-  }
-
-  evaluate (context) {
-    return this.inlineBeans.map( inlineBean => {
-      return inlineBean instanceof Bean ? inlineBean.evaluate(context) : inlineBean
-    }).join('')
-  }
-}

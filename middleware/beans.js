@@ -42,8 +42,8 @@ module.exports = function beans (req, res, done) {
           && app.bnsConfig 
           && (tplConf = app.bnsConfig[beanData.id])
           && tplConf.data) {
-        debug(`Rendering template:::${beanData.id}:::using fn:::${beanData.fn}:::with data args:::${beanData.args}`)
         const fn = eval(beanData.fn)
+        debug(`Rendering template:::${beanData.id}:::using fn:::${fn}:::with data args:::${beanData.args}`)
         return tplConf.data(beanData.args).then( data => {
           debug(`And with data:::`)
           debug(data)
