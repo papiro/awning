@@ -34,8 +34,8 @@ if (auth) {
 
   if (basic) {
     const { gateway } = basic
-    basicFn = ({ url }, res) => {
-      const payload = res.getPOSTpayload()
+    basicFn = (req, res) => {
+      const payload = req.getPOSTpayload()
       authController
         .once('user.create.success', () => {
           debug('SUCCESSFUL:::user.create')
@@ -46,7 +46,7 @@ if (auth) {
           throw err
         })
 
-      switch (url) {
+      switch (req.url) {
         case gateway.create:
           authController.userCreate(payload.username, payload.password)      
           break
