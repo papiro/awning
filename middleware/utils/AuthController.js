@@ -8,7 +8,7 @@ const
 ,
   AwningStore = require('awning').Store,
   _sessions = [],
-  _users = new AwningStore('users.db.json')
+  _users = new AwningStore({ file: app.auth.usersDB || 'users.db.json' })
 ,
   otpStrLength = 6
 ,
@@ -18,76 +18,79 @@ const
 class AuthController extends EventEmitter {
   constructor () {
     super()
-  }
 
-  user: {
-    create (username, password) {
-      debug('creating user:::', username)
-      debug('with password:::', password)
- 
-      // Generate salt
-      const salt = await new Promise( (resolve, reject) => {
-        crypto.randomBytes(saltLength, (err, buf) => {
-          if (err) throw err
-          resolve(buf.toString())
-        })
-      })
-    
-      debug('generated salt:::', salt)
-    
-      // Generate password hash
-      const hashedPassword = await new Promise( (resolve, reject) => {            
-        crypto.pbkdf2(password, salt, pbkdf2_iterations, pbkdf2_keylen, pbkdf2_digestAlgorithm, (err, hashedPassword) => {
-          if (err) throw err
-          resolve(hashedPassword.toString())
-        })
-      })
-      
-      debug('hashed password is:::', hashedPassword)
-      
-      _users[username] = {
-        password: hashedPassword,
-        salt
+    Object.assign(this, {
+      user: {
+        create: this.userCreate,
+        login: this.userLogin
+      },
+      hash: {
+        create: this.hashCreate,
+        verify: this.hashVerify
+      },
+      session: {
+        init: this.sessionInit,
+        isValid: this.sessionIsValid
       }
-      this.emit('user.create.success')
-    }
+    })
   }
 
-  hash: {
-    async create (str, salt) {
-      return await hasher(str, salt)
+  async userCreate (username, password) {
+    debug('creating user:::', username)
+    debug('with password:::', password)
+
+    if (username in _users.get()) {
+      throw new Error('User already exists')
     }
-    async verify (str, hash, salt) {
-      const hashedStr = await hasher(str, salt)
-      return hashedStr === hash
-    }
+
+    const { hash: hashedPassword, salt } = await this.hashCreate(password)
+
+    debug('generated salt:::', salt)
+    debug('hashed password is:::', hashedPassword)
+    
+    _users.set(username,{
+      password: hashedPassword,
+      salt
+    })
   }
 
-  session: {
-    init (res) {
-      const 
-        uuid = crypto.randomBytes(16).toString('hex'),
-        expires = 900//seconds
-      ;
-      _sessions.push({ uuid, expires: Date.now() + expires * 1000 })
-      debug(`Setting HttpOnly Cookie: AWNID=${uuid}`)
-      res.setHeader('Set-Cookie', `AWNID=${uuid}; HttpOnly; Max-Age=900; Path=/`) // TODO: add "Secure"
-    }
+  userLogin (username, password) {
 
-    isValid ({ cookies }) {
-      if (!cookies) return false
-      
-      const awnid = cookies.AWNID
-      if (!awnid) return false
-      debug('Detected awnid: ', awnid)
+  }
 
-      debug('Sessions: ', _sessions)
+  async hashCreate (str, salt) {
+    const hash = await hasher(str, salt)
+    return hash
+  }
 
-      const session = _sessions.find(session => ( session.uuid === awnid ))
-      if (session && Date.now() <= session.expires) return true
+  async hashVerify (str, hash, salt) {
+    const hashedStr = await hasher(str, salt)
+    return hashedStr === hash
+  }
 
-      return false    
-    }
+  sessionInit (res) {
+    const 
+      uuid = crypto.randomBytes(16).toString('hex'),
+      expires = 900//seconds
+    ;
+    _sessions.push({ uuid, expires: Date.now() + expires * 1000 })
+    debug(`Setting HttpOnly Cookie: AWNID=${uuid}`)
+    res.setHeader('Set-Cookie', `AWNID=${uuid}; HttpOnly; Max-Age=900; Path=/`) // TODO: add "Secure"
+  }
+
+  sessionIsValid ({ cookies }) {
+    if (!cookies) return false
+    
+    const awnid = cookies.AWNID
+    if (!awnid) return false
+    debug('Detected awnid: ', awnid)
+
+    debug('Sessions: ', _sessions)
+
+    const session = _sessions.find(session => ( session.uuid === awnid ))
+    if (session && Date.now() <= session.expires) return true
+
+    return false    
   }
 
   isProtectedResource ({ url: req_url, params: req_params, method: req_method }, protectedResourcesConfig) {
@@ -105,10 +108,6 @@ class AuthController extends EventEmitter {
         return true
       }
     })
-  }
-
-  userLogin (username, password) {
-
   }
 
   sendOtpCode (username) {

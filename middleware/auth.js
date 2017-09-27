@@ -30,33 +30,46 @@ if (auth) {
   if (!protectedResources) throw new ReferenceError('No protected resources found in the config auth object.  No point in having auth without having resources which need protection.')
   
   debug(basic, otp, custom)
-  debug(`Protected resources:::${protectedResources}`)
+  debug('Protected resources')
+  debug(protectedResources)
 
   if (basic) {
     const { gateway } = basic
-    basicFn = (req, res) => {
-      const payload = req.getPOSTpayload()
-      authController
-        .once('user.create.success', () => {
-          debug('SUCCESSFUL:::user.create')
-          done()
-        })
-        .once('user.create.fail', err => {
-          debug('ERROR:::user.create')
-          throw err
-        })
+    basicFn = async (req, res) => {
+      return new Promise( async (resolve, reject) => {
+        // Short-circuit if not gateway
+        if (req.url !== gateway.create && req.url !== gateway.login) return resolve()
 
-      switch (req.url) {
-        case gateway.create:
-          authController.userCreate(payload.username, payload.password)      
+        const payload = await req.getPOSTpayload()
+        debug('Payload')
+        debug(payload)
+
+        switch (req.url) {
+          case gateway.create:
+            authController.userCreate(payload.username, payload.password)      
+              .then(() => {
+                debug('SUCCESSFUL:::user.create')
+                res.writeHead(200)
+                resolve(false)
+              })
+              .catch(err => {
+                debug('ERROR:::user.create')
+                debug(err)
+                res.publish(409, {
+                  error: true,
+                  code: 'USER_EXISTS'
+                })
+                resolve(false) 
+              })
+            break
+          case gateway.login:
+            authController.userLogin(payload.username, payload.password)
+            break
+          default:
+            return done()
           break
-        case gateway.login:
-          authController.userLogin(payload.username, payload.password)
-          break
-        default:
-          return done()
-        break
-      }
+        }
+      })
     }
   }
 
@@ -120,9 +133,10 @@ if (auth) {
     // When executed, these functions will return promises
     Promise.all([basicFn, otpFn, customFn].map( fn => fn(req, res)))
       .then( results => {
-        done()
+        done(~results.indexOf(false))
       }).catch( err => {
-        console.error(err)
+        res.emit('error', err)
+        done(false)
       })
   }
 }
