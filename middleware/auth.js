@@ -133,7 +133,7 @@ if (auth) {
     // When executed, these functions will return promises
     Promise.all([basicFn, otpFn, customFn].map( fn => fn(req, res)))
       .then( results => {
-        done(~results.indexOf(false))
+        done(!~results.indexOf(false))
       }).catch( err => {
         res.emit('error', err)
         done(false)
