@@ -3,13 +3,12 @@
 /***
   *   debuglog namespaces: awning, awning.REST, awning.rewrite, awning.static
 ***/
-exports.dev = require('./lib/awningDev')
-
-exports.build = require('./lib/awningBuild')
-
-exports.utils = require('./lib/AwningUtils')
-
-exports.Store = require('./lib/AwningStore')
+Object.assign(exports, {
+  dev:   require('./lib/awningDev'),
+  build: require('./lib/awningBuild'),
+  utils: require('./lib/AwningUtils'),
+  Store: require('./lib/AwningStore')
+})
 
 exports.server = (config = {}) => {
   const 
@@ -53,16 +52,11 @@ exports.server = (config = {}) => {
     onRequest = noop, 
     socketTimeout = 120000,
     middleware = [
-      //  'logger',
-      //  'csrf.originCheck',
-      //  'csrf.synchronizer',
+      'logger',
       'auth',
       'REST', 
       'rewrite', 
-      //  'headers.mimeType', 
-      //  'headers.caching',
-      'beans'//,
-      //  'static'
+      'beans'
     ]
   } = config
 
