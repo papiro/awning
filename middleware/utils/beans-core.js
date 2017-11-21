@@ -28,22 +28,22 @@ module.exports = {
       debug(`Found match:::${match}`)
 
       const 
+        // "original" is the markup which is being searched.
         [ original, openingBeanTag, bean, inlineBean ] = match,
-        matchIndex = match.index
+        matchStart = match.index
       let
         bns = bean || inlineBean
 
       // First some ritual:
       // Grab any stray regular HTML markup.
-      if (previousMatchEnd < matchIndex) {
-        const inBetweener = markup.slice(previousMatchEnd, matchIndex)
+      if (previousMatchEnd < matchStart) {
+        const inBetweener = markup.slice(previousMatchEnd, matchStart)
         debug(`Markup in between beans:::${inBetweener}`)
         pieces.push({ markup: inBetweener })
       }
 
-      previousMatchEnd = matchIndex + original.length
+      previousMatchEnd = matchStart + original.length
 
-      // Now onto business:
       bns = bns.trim()
       debug(`Bean:::${bns}`)
 
@@ -58,11 +58,7 @@ module.exports = {
           let dataArgs = openingBeanTag.match(/data-args=['"](.*)['"]/)
           dataArgs = dataArgs && dataArgs[1]
           dataAs = dataAs && dataAs[1]
-
-          debug(`Bean ID:::${beanId}`)
-          debug(`Bean data args:::${dataArgs}`)
-          debug(`Bean is js:::${isJS}`)
-          debug(`Bean data as:::${dataAs}`)
+          debug('Bean ID:::${beanId}\nBean data args:::${dataArgs}\nBean is js:::${isJS}\nBean data as:::${dataAs}\n')
           const precompiled = isJS ? precompileJS(bns, dataAs) : precompile(bns, beanId)
           debug(`Precompiled match:::${precompiled}`)
           pieces.push({ fn: precompiled, id: beanId, args: dataArgs })

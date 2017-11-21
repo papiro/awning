@@ -3,17 +3,15 @@
 /***
   *   debuglog namespaces: awning, awning.REST, awning.rewrite, awning.static
 ***/
-Object.assign(exports, {
-  dev:   require('./lib/awningDev'),
-  build: require('./lib/awningBuild'),
-  utils: require('./lib/AwningUtils'),
-  Store: require('./lib/AwningStore')
-})
+exports.dev = require('./lib/dev')
+exports.build = require('./lib/build')
+exports.utils = require('./lib/utils')
+exports.Store = require('./lib/store')
 
 exports.server = (config = {}) => {
   const 
     paths = {
-      HttpServer: './lib/AwningServer',
+      HttpServer: './lib/server',
       middleware: './middleware'
     }
   ,
@@ -36,7 +34,7 @@ exports.server = (config = {}) => {
     bnsConfig
   } = config
 
-  Object.assign(global.app, {
+  Object.assign(global.app = {}, {}, {
     root,
     api,
     auth,
